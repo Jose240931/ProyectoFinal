@@ -568,7 +568,7 @@
     </routine>
     <schema id="214" parent="1" name="main">
       <Current>1</Current>
-      <LastIntrospectionLocalTimestamp>2026-01-17.15:45:50</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2026-01-17.16:27:13</LastIntrospectionLocalTimestamp>
     </schema>
     <argument id="215" parent="14">
       <ArgumentDirection>R</ArgumentDirection>
@@ -1806,28 +1806,186 @@
     <argument id="626" parent="213">
       <Position>1</Position>
     </argument>
-    <table id="627" parent="214" name="sqlite_master">
+    <table id="627" parent="214" name="categoria"/>
+    <table id="628" parent="214" name="lista"/>
+    <table id="629" parent="214" name="lista_categoria"/>
+    <table id="630" parent="214" name="producto"/>
+    <table id="631" parent="214" name="sqlite_master">
       <System>1</System>
     </table>
-    <column id="628" parent="627" name="type">
+    <table id="632" parent="214" name="sqlite_sequence">
+      <System>1</System>
+    </table>
+    <table id="633" parent="214" name="usuario"/>
+    <column id="634" parent="627" name="id_categoria">
+      <AutoIncrement>1</AutoIncrement>
       <Position>1</Position>
-      <StoredType>TEXT|0s</StoredType>
+      <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="629" parent="627" name="name">
+    <column id="635" parent="627" name="nombre_categoria">
+      <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="630" parent="627" name="tbl_name">
+    <index id="636" parent="627" name="sqlite_autoindex_categoria_1">
+      <ColNames>nombre_categoria</ColNames>
+      <NameSurrogate>1</NameSurrogate>
+      <Unique>1</Unique>
+    </index>
+    <key id="637" parent="627">
+      <ColNames>id_categoria</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <key id="638" parent="627">
+      <ColNames>nombre_categoria</ColNames>
+      <UnderlyingIndexName>sqlite_autoindex_categoria_1</UnderlyingIndexName>
+    </key>
+    <column id="639" parent="628" name="id_lista">
+      <AutoIncrement>1</AutoIncrement>
+      <Position>1</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="640" parent="628" name="id_usuario">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="641" parent="628" name="nombre_lista">
+      <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="631" parent="627" name="rootpage">
+    <column id="642" parent="628" name="fecha_creacion">
+      <NotNull>1</NotNull>
       <Position>4</Position>
-      <StoredType>INT|0s</StoredType>
+      <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="632" parent="627" name="sql">
+    <column id="643" parent="628" name="fecha_modificacion">
       <Position>5</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
+    <foreign-key id="644" parent="628">
+      <ColNames>id_usuario</ColNames>
+      <RefColNames>id_usuario</RefColNames>
+      <RefTableName>usuario</RefTableName>
+    </foreign-key>
+    <key id="645" parent="628">
+      <ColNames>id_lista</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="646" parent="629" name="id_lista">
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="647" parent="629" name="id_categoria">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <foreign-key id="648" parent="629">
+      <ColNames>id_lista</ColNames>
+      <RefColNames>id_lista</RefColNames>
+      <RefTableName>lista</RefTableName>
+    </foreign-key>
+    <foreign-key id="649" parent="629">
+      <ColNames>id_categoria</ColNames>
+      <RefColNames>id_categoria</RefColNames>
+      <RefTableName>categoria</RefTableName>
+    </foreign-key>
+    <index id="650" parent="629" name="sqlite_autoindex_lista_categoria_1">
+      <ColNames>id_lista
+id_categoria</ColNames>
+      <NameSurrogate>1</NameSurrogate>
+      <Unique>1</Unique>
+    </index>
+    <key id="651" parent="629">
+      <ColNames>id_lista
+id_categoria</ColNames>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>sqlite_autoindex_lista_categoria_1</UnderlyingIndexName>
+    </key>
+    <column id="652" parent="630" name="id_producto">
+      <AutoIncrement>1</AutoIncrement>
+      <Position>1</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="653" parent="630" name="nombre_producto">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>TEXT|0s</StoredType>
+    </column>
+    <column id="654" parent="630" name="descripcion">
+      <Position>3</Position>
+      <StoredType>TEXT|0s</StoredType>
+    </column>
+    <column id="655" parent="630" name="id_categoria">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <foreign-key id="656" parent="630">
+      <ColNames>id_categoria</ColNames>
+      <RefColNames>id_categoria</RefColNames>
+      <RefTableName>categoria</RefTableName>
+    </foreign-key>
+    <key id="657" parent="630">
+      <ColNames>id_producto</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="658" parent="631" name="type">
+      <Position>1</Position>
+      <StoredType>TEXT|0s</StoredType>
+    </column>
+    <column id="659" parent="631" name="name">
+      <Position>2</Position>
+      <StoredType>TEXT|0s</StoredType>
+    </column>
+    <column id="660" parent="631" name="tbl_name">
+      <Position>3</Position>
+      <StoredType>TEXT|0s</StoredType>
+    </column>
+    <column id="661" parent="631" name="rootpage">
+      <Position>4</Position>
+      <StoredType>INT|0s</StoredType>
+    </column>
+    <column id="662" parent="631" name="sql">
+      <Position>5</Position>
+      <StoredType>TEXT|0s</StoredType>
+    </column>
+    <column id="663" parent="632" name="name">
+      <Position>1</Position>
+    </column>
+    <column id="664" parent="632" name="seq">
+      <Position>2</Position>
+    </column>
+    <column id="665" parent="633" name="id_usuario">
+      <AutoIncrement>1</AutoIncrement>
+      <Position>1</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="666" parent="633" name="nombre">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>TEXT|0s</StoredType>
+    </column>
+    <column id="667" parent="633" name="email">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>TEXT|0s</StoredType>
+    </column>
+    <index id="668" parent="633" name="sqlite_autoindex_usuario_1">
+      <ColNames>email</ColNames>
+      <NameSurrogate>1</NameSurrogate>
+      <Unique>1</Unique>
+    </index>
+    <key id="669" parent="633">
+      <ColNames>id_usuario</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <key id="670" parent="633">
+      <ColNames>email</ColNames>
+      <UnderlyingIndexName>sqlite_autoindex_usuario_1</UnderlyingIndexName>
+    </key>
   </database-model>
 </dataSource>
