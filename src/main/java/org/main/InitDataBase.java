@@ -17,6 +17,7 @@ public class InitDataBase {
 
         // Leer todó el contenido de schema.sql
         String sql = Files.readString(Paths.get("src/main/resources/schemas.sql"));
+        //Con esto creo el esquema de la base de datos
         stmt.executeUpdate(sql);
 
         stmt.close();
