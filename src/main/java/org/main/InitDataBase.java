@@ -20,6 +20,12 @@ public class InitDataBase {
         //Con esto creo el esquema de la base de datos
         stmt.executeUpdate(sql);
 
+        //Leo el contenido de los datos
+        String categoriasSql = Files.readString(Paths.get("src/main/resources/data.sql"));
+        //Aqui ejecuta las sentencias de cargado de datos
+        stmt.executeUpdate(categoriasSql);
+
+
         stmt.close();
         conn.close();
 
