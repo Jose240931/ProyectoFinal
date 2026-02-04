@@ -1,5 +1,8 @@
 plugins {
     id("java")
+    id("org.openjfx.javafxplugin") version "0.0.13"
+    id("org.beryx.jlink") version "2.25.0"
+    application
 }
 
 group = "org.example"
@@ -7,6 +10,19 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+}
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+javafx {
+    version = "21.0.2"
+    modules = listOf(
+        "javafx.controls",
+        "javafx.fxml"
+    )
 }
 
 dependencies {
@@ -17,6 +33,19 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:2.0.12")
 }
 
+application {
+    mainClass.set("org.main.Launcher")
+    mainModule.set("org.main")
+}
+
 tasks.test {
     useJUnitPlatform()
+}
+
+jlink {
+    imageZip.set(layout.buildDirectory.file("/distributions/app-${javafx.platform.classifier}.zip"))
+    options.set(listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages"))
+    launcher {
+        name = "app"
+    }
 }
