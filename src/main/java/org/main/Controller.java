@@ -46,4 +46,8 @@ public class Controller {
     public void guardar(ActionEvent actionEvent) {
         //TODO
     }
+
+    public void marcado(ActionEvent actionEvent) {
+        //TODO
+    }
 }

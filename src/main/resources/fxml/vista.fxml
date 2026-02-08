@@ -44,6 +44,7 @@
             </HBox>
 
             <ListView fx:id="listaOrdenada"/>
+            <Button text="Marcado" onAction="#marcado"/>
         </VBox>
     </center>
 </BorderPane>

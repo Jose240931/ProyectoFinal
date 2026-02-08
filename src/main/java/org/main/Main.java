@@ -13,7 +13,10 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/vista.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
+        Scene scene = new Scene(fxmlLoader.load(), 320, 400);
+        scene.getStylesheets().add(
+                getClass().getResource("/css/fondo.css").toExternalForm()
+        );
         stage.setTitle("Lista auto ordenada");
         stage.getIcons().add(
                 new Image(Objects.requireNonNull(Main.class.getResourceAsStream("/icons/app.png")))
