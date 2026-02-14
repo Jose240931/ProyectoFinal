@@ -13,7 +13,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/vista.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 400);
+        Scene scene = new Scene(fxmlLoader.load(), 400, 450);
         scene.getStylesheets().add(
                 getClass().getResource("/css/fondo.css").toExternalForm()
         );

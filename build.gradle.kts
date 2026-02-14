@@ -31,6 +31,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.xerial:sqlite-jdbc:3.45.1.0")
     implementation("org.slf4j:slf4j-simple:2.0.12")
+    implementation("com.sun.mail:jakarta.mail:2.0.2")
 }
 
 application {

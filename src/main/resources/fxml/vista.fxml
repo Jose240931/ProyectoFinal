@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.HBox?>
@@ -13,7 +12,7 @@
 <?import javafx.scene.control.MenuItem?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.main.Controller">
+            fx:controller="org.main.controller.Controller">
     <!-- Menú fijo arriba -->
     <top>
         <MenuBar>
@@ -24,7 +23,7 @@
                     <MenuItem text="Salir" onAction="#salir"/>
                 </Menu>
                 <Menu text="Ayuda">
-                    <MenuItem text="Acerca de"/>
+                    <MenuItem text="Acerca de" onAction="#acercaDe"/>
                 </Menu>
             </menus>
         </MenuBar>
@@ -36,15 +35,15 @@
                 <Insets top="20" bottom="20" left="20" right="20"/>
             </padding>
 
-            <TextArea fx:id="input" promptText="Introduzca su lista"/>
+            <TextArea fx:id="input" promptText="Introduzca su lista" prefHeight="250"/>
 
             <HBox alignment="CENTER" spacing="20">
                 <Button text="Ordenar" onAction="#ordenar"/>
-                <Button text="Borrar" onAction="#borrar"/>
+                <Button fx:id="botonBorrar" text="Borrar" onAction="#borrar"/>
             </HBox>
 
             <ListView fx:id="listaOrdenada"/>
-            <Button text="Marcado" onAction="#marcado"/>
+            <Button fx:id="botonBorrarSeleccionado" text="Borrar seleccionado" onAction="#marcado"/>
         </VBox>
     </center>
 </BorderPane>
