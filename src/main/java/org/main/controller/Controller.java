@@ -24,82 +24,81 @@ import java.util.TreeMap;
 public class Controller {
 
     public TextArea input;
-    public ListView <String> listaOrdenada;
+    public ListView<String> listaOrdenada;
 
     public List<String> obtenerListaOrdenada() {
         return new ArrayList<>(listaOrdenada.getItems());
     }
 
-
-    //Borra tanto la lista escrita sin ordenar como la ordenada
+    // Borra tanto la lista escrita sin ordenar como la ordenada
     public void borrar(ActionEvent actionEvent) {
         input.clear();
-        listaOrdenada.getItems().removeAll(listaOrdenada.getItems());
+        listaOrdenada.getItems().clear();
     }
 
-    //Metodo principal con el que se ordenaran los articulos en una lista por secciones
+    // Método principal con el que se ordenan los artículos en una lista por secciones
     public void ordenar(ActionEvent actionEvent) {
-        //Inicializo el service de la base de datos
         DBService db = new DBService();
-        //limpio la lista ordenada antes de volver a ordenar otra lista
         listaOrdenada.getItems().clear();
 
-        //almaceno la lista en un string
         String texto = input.getText();
-        //Normalizo el texto quitando tildes y pasando a minuscula ademas de quitar espacios en blanco
-        Normalizer.normalize(texto, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-                .toLowerCase()
-                .trim();
 
-        //en caso de que el texto este vacio y el boton ordenar se haya pulsado no devuelve nada, simplemente vacia la lista
-        if(texto.isEmpty()){
+        if (texto == null || texto.isBlank()) {
             return;
         }
 
-        //Creo un array de string que esta formada por el texto dividido en los salots de linea
-        String [] productos = texto.split("\\R");
-
-        //Almaceno la relacion de categorias y productos en un treemap, que ordena automaticamente por orden de lista
+        String[] productos = texto.split("\\R");
         Map<String, List<String>> porCategoria = new TreeMap<>();
 
-        //Recorro el array de productos para buscarlos en la base de datos
-        for(int i =0; i<productos.length; i++){
-            String producto =productos[i].trim().toLowerCase();
+        for (String lineaOriginal : productos) {
+            String lineaTrimmed = lineaOriginal.trim();
 
-            // Manejo de plurales simples quitando "s" al final si tiene más de 3 letras (apaño cutre)
-            if (producto.length() > 3 && producto.endsWith("s")) {
-                producto = producto.substring(0, producto.length() - 1);
+            if (lineaTrimmed.isEmpty()) {
+                continue;
             }
 
-            ProductoInfo info = db.obtenerCategoria(producto);
+            // Se normaliza y se almacena en una variable
+            String productoNormalizado = Normalizer
+                    .normalize(lineaTrimmed, Normalizer.Form.NFD)
+                    .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                    .toLowerCase()
+                    .trim();
+
+            // Manejo de plurales: quita la "s" final si el producto tiene más de 3 letras
+            String productoQuery = productoNormalizado;
+            if (productoQuery.length() > 3 && productoQuery.endsWith("s")
+                    && !productoQuery.endsWith("ss")) {
+                productoQuery = productoQuery.substring(0, productoQuery.length() - 1);
+            }
+
+            ProductoInfo info = db.obtenerCategoria(productoQuery);
+
             String categoria;
             String nombreMostrar;
 
-            if(info==null){
-                categoria="No clasificado";
-                nombreMostrar=productos[i];
-            }else{
-                categoria=info.getCategoria();
-                nombreMostrar=info.getNombreReal();
+            if (info == null) {
+                categoria    = "No clasificado";
+                // Muestra el texto original del usuario (con mayúsculas y tildes)
+                nombreMostrar = lineaTrimmed;
+            } else {
+                categoria    = info.getCategoria();
+                nombreMostrar = info.getNombreReal();
             }
 
-            //Almaceno en mi tree map la asosiacion de cada producto a su correspondiente categoria
-            porCategoria.computeIfAbsent(categoria, k -> new ArrayList<>())
+            porCategoria
+                    .computeIfAbsent(categoria, k -> new ArrayList<>())
                     .add(nombreMostrar);
-
         }
 
-        //Bloque donde muestro en el list view mi lista ordenada
-        for(String categoria: porCategoria.keySet()){
-            listaOrdenada.getItems().add("===="+categoria+"====");
+        // Vuelca el mapa ordenado en el ListView
+        for (String categoria : porCategoria.keySet()) {
+            listaOrdenada.getItems().add("====" + categoria + "====");
             for (String producto : porCategoria.get(categoria)) {
                 listaOrdenada.getItems().add(producto);
             }
         }
-
     }
 
-    //Al pulsar en salir cierra el programa de la misma manera que si pulsaras sobre la x de la esquina superior
     public void salir(ActionEvent actionEvent) {
         Platform.exit();
     }
@@ -124,8 +123,8 @@ public class Controller {
         FileChooser guardarArchivo = new FileChooser();
         guardarArchivo.setTitle("Guardar archivo");
 
-        //Creo un filtro para que el archivo se guarde como txt
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivo de texto(*.txt)", "*.txt");
+        FileChooser.ExtensionFilter extFilter =
+                new FileChooser.ExtensionFilter("Archivo de texto (*.txt)", "*.txt");
         guardarArchivo.getExtensionFilters().add(extFilter);
 
         //Apertura del dialogo del sistema operativo
@@ -145,7 +144,6 @@ public class Controller {
                 e.printStackTrace();
             }
         }
-
     }
 
     public void marcado(ActionEvent actionEvent) {
@@ -160,7 +158,7 @@ public class Controller {
         //Alerta de informacion sobre el programa
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Acerca de lista auto ordenada");
-        alert.setHeaderText("Acerca de ");
+        alert.setHeaderText("Acerca de");
         alert.setContentText("Programa realizado por Jose Garrido Luna 2026 2ºDAM");
         alert.showAndWait();
     }

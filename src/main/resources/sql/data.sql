@@ -339,6 +339,9 @@ INSERT INTO producto (nombre_producto, descripcion, id_categoria) VALUES
 -- INSERCIÓN DE PRODUCTOS - CARNICERÍA (ID: 8)
 -- =========================
 INSERT INTO producto (nombre_producto, descripcion, id_categoria) VALUES
+                                                                      ('Cerdo', NULL, 8),
+                                                                      ('Ternera', NULL, 8),
+                                                                      ('Pollo', NULL, 8),
                                                                       ('Carne vacuno', NULL, 8),
                                                                       ('Carne ternera', NULL, 8),
                                                                       ('Carne de cerdo', NULL, 8),
