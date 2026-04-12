@@ -139,8 +139,4 @@ public class DBService {
         }
         return dp[la][lb];
     }
-
-    public void almacenarLista() {
-        // TODO
-    }
 }
