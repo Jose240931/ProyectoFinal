@@ -8,9 +8,16 @@ import java.util.List;
 
 public class DBService {
 
-    private static final String URL = "jdbc:sqlite:src/data/info.db";
+    //Path para que encuentre la base de datos una vez empaquetado el programa
+    private static final String URL = "jdbc:sqlite:" +
+            java.nio.file.Paths.get(System.getProperty("user.dir"), "info.db").toString();
 
     private Connection getConexion() throws SQLException {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("No se encontró org.sqlite.JDBC en el runtime (sqlite-jdbc no está incluido).", e);
+        }
         return DriverManager.getConnection(URL);
     }
     public ProductoInfo obtenerCategoria(String producto) {

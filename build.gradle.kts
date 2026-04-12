@@ -13,7 +13,7 @@ repositories {
 }
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 
@@ -36,7 +36,7 @@ dependencies {
 
 application {
     mainClass.set("org.main.Launcher")
-    mainModule.set("org.main")
+    mainModule.set("ProyectoFinal.main")
 }
 
 tasks.test {
@@ -46,7 +46,18 @@ tasks.test {
 jlink {
     imageZip.set(layout.buildDirectory.file("/distributions/app-${javafx.platform.classifier}.zip"))
     options.set(listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages"))
+    forceMerge("sqlite-jdbc")
+
+    mergedModule {
+        // el merged module necesita java.sql
+        requires("java.sql")
+        requires("java.logging")
+    }
+
     launcher {
         name = "app"
+    }
+    jpackage {
+        installerType = "exe"
     }
 }
