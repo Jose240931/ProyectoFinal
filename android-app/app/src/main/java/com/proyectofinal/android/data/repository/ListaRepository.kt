@@ -4,8 +4,9 @@ import com.proyectofinal.android.data.db.dao.ListaDao
 import com.proyectofinal.android.data.db.entity.Lista
 import com.proyectofinal.android.data.db.entity.ListaItem
 import kotlinx.coroutines.flow.Flow
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ListaRepository(private val listaDao: ListaDao) {
 
@@ -15,7 +16,7 @@ class ListaRepository(private val listaDao: ListaDao) {
         listaDao.getItemsByLista(idLista)
 
     suspend fun guardarLista(nombre: String, items: List<ListaItem>): Long {
-        val ahora = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        val ahora = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
         val lista = Lista(nombreLista = nombre, fechaCreacion = ahora)
         val newId = listaDao.insertLista(lista)
         val itemsConId = items.map { it.copy(idLista = newId.toInt()) }

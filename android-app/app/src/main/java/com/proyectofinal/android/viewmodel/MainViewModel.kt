@@ -113,6 +113,4 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun clearSavedMessage() {
         _uiState.value = _uiState.value.copy(savedMessage = null)
     }
-
-    private fun normalizar(texto: String): String = normalizarTexto(texto)
 }
