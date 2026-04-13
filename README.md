@@ -17,7 +17,7 @@ An Android Kotlin port of the **Lista Auto Ordenada** JavaFX application. It aut
 ## Opening in Android Studio
 
 1. Open **Android Studio** (Hedgehog or newer recommended).
-2. Choose **File → Open** and select the `android-app/` folder.
+2. Choose **File → Open** and select the root of this branch (`version-android`).
 3. Let Gradle sync finish (it will download dependencies automatically).
 4. Connect a device or start an emulator (API 24+).
 
@@ -27,7 +27,7 @@ An Android Kotlin port of the **Lista Auto Ordenada** JavaFX application. It aut
 
 - **Emulator**: Click the green **Run** button or press `Shift+F10`.
 - **Physical device**: Enable USB debugging, connect the device, then run.
-- **Command line**: `./gradlew :app:installDebug` from within `android-app/`.
+- **Command line**: `./gradlew :app:installDebug` from the root of this branch.
 
 ---
 
