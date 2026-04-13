@@ -7,6 +7,7 @@ import com.proyectofinal.android.data.db.AppDatabase
 import com.proyectofinal.android.data.db.entity.ListaItem
 import com.proyectofinal.android.data.repository.ListaRepository
 import com.proyectofinal.android.data.repository.ProductoRepository
+import com.proyectofinal.android.util.normalizarTexto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,7 +48,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val lineaTrimmed = lineaOriginal.trim()
                 if (lineaTrimmed.isEmpty()) continue
 
-                var query = normalizar(lineaTrimmed)
+                var query = normalizarTexto(lineaTrimmed)
                 if (query.length > 3 && query.endsWith('s') && !query.endsWith("ss")) {
                     query = query.dropLast(1)
                 }
@@ -113,10 +114,5 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.value = _uiState.value.copy(savedMessage = null)
     }
 
-    private fun normalizar(texto: String): String =
-        texto.lowercase()
-            .replace('á', 'a').replace('é', 'e')
-            .replace('í', 'i').replace('ó', 'o')
-            .replace('ú', 'u').replace('ü', 'u')
-            .replace('ñ', 'n')
+    private fun normalizar(texto: String): String = normalizarTexto(texto)
 }

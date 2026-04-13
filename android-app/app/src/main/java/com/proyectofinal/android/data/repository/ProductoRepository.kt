@@ -2,6 +2,7 @@ package com.proyectofinal.android.data.repository
 
 import com.proyectofinal.android.data.db.dao.ProductoDao
 import com.proyectofinal.android.data.db.dao.ProductoConCategoria
+import com.proyectofinal.android.util.normalizarTexto
 
 class ProductoRepository(private val productoDao: ProductoDao) {
 
@@ -10,12 +11,12 @@ class ProductoRepository(private val productoDao: ProductoDao) {
      * Mirrors the relevance-scoring logic from the original Java DBService.
      */
     suspend fun obtenerCategoria(nombreProducto: String): ProductoConCategoria? {
-        val query = normalizar(nombreProducto.trim())
+        val query = normalizarTexto(nombreProducto.trim())
         val candidatos = productoDao.buscarProductos(query)
         if (candidatos.isEmpty()) return null
 
         return candidatos.minByOrNull { candidato ->
-            calcularRelevancia(normalizar(candidato.nombre_producto), query)
+            calcularRelevancia(normalizarTexto(candidato.nombre_producto), query)
         }
     }
 
@@ -29,13 +30,6 @@ class ProductoRepository(private val productoDao: ProductoDao) {
         if (nombreNormalizado.contains(queryNormalizado)) return 30
         return 40 + levenshtein(nombreNormalizado, queryNormalizado)
     }
-
-    private fun normalizar(texto: String): String =
-        texto.lowercase()
-            .replace('á', 'a').replace('é', 'e')
-            .replace('í', 'i').replace('ó', 'o')
-            .replace('ú', 'u').replace('ü', 'u')
-            .replace('ñ', 'n')
 
     private fun levenshtein(a: String, b: String): Int {
         val la = a.length; val lb = b.length
