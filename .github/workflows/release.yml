@@ -1,0 +1,144 @@
+name: Build & Release (jpackage)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  APP_NAME: ProyectoFinal
+  MAIN_JAR: ProyectoFinal-1.0-SNAPSHOT.jar
+  MAIN_CLASS: org.main.Launcher
+  INPUT_DIR: build/install/ProyectoFinal/lib
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version from tag
+        shell: bash
+        run: |
+          echo "APP_VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+
+      - name: Install packaging tools (deb/rpm)
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fakeroot rpm
+
+      - name: Setup Java (Liberica Full 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: liberica
+          java-version: "17"
+
+      - name: Build installDist
+        shell: bash
+        run: ./gradlew --no-daemon clean installDist
+
+      - name: jpackage (Linux app-image)
+        shell: bash
+        run: |
+          jpackage \
+            --type app-image \
+            --name "${APP_NAME}" \
+            --app-version "${APP_VERSION}" \
+            --input "${INPUT_DIR}" \
+            --main-jar "${MAIN_JAR}" \
+            --main-class "${MAIN_CLASS}" \
+            --dest build/jpackage
+
+      - name: Create portable tar.gz
+        shell: bash
+        run: |
+          ASSET_TGZ="${APP_NAME}-${APP_VERSION}-linux-x64.tar.gz"
+          tar -czf "${ASSET_TGZ}" -C build/jpackage "${APP_NAME}"
+          echo "ASSET_TGZ=${ASSET_TGZ}" >> $GITHUB_ENV
+
+      - name: jpackage (Linux deb)
+        shell: bash
+        run: |
+          jpackage \
+            --type deb \
+            --name "${APP_NAME}" \
+            --app-version "${APP_VERSION}" \
+            --input "${INPUT_DIR}" \
+            --main-jar "${MAIN_JAR}" \
+            --main-class "${MAIN_CLASS}" \
+            --dest build/jpackage
+
+      - name: jpackage (Linux rpm)
+        shell: bash
+        run: |
+          jpackage \
+            --type rpm \
+            --name "${APP_NAME}" \
+            --app-version "${APP_VERSION}" \
+            --input "${INPUT_DIR}" \
+            --main-jar "${MAIN_JAR}" \
+            --main-class "${MAIN_CLASS}" \
+            --dest build/jpackage
+
+      - name: Collect deb/rpm assets
+        shell: bash
+        run: |
+          # Copia deb/rpm al root para subirlos fácil
+          find build/jpackage -maxdepth 1 -type f \( -name "*.deb" -o -name "*.rpm" \) -print -exec cp -v {} . \; || true
+
+      - name: Upload assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.ASSET_TGZ }}
+            *.deb
+            *.rpm
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version from tag
+        shell: pwsh
+        run: |
+          $ver = "${{ github.ref_name }}".TrimStart("v")
+          echo "APP_VERSION=$ver" >> $env:GITHUB_ENV
+
+      - name: Setup Java (Liberica Full 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: liberica
+          java-version: "17"
+
+      - name: Build installDist
+        shell: pwsh
+        run: .\gradlew.bat --no-daemon clean installDist
+
+      - name: jpackage (Windows app-image)
+        shell: pwsh
+        run: |
+          jpackage `
+            --type app-image `
+            --name "${{ env.APP_NAME }}" `
+            --app-version "${{ env.APP_VERSION }}" `
+            --input "${{ env.INPUT_DIR }}" `
+            --main-jar "${{ env.MAIN_JAR }}" `
+            --main-class "${{ env.MAIN_CLASS }}" `
+            --dest build\jpackage
+
+      - name: Zip app-image
+        shell: pwsh
+        run: |
+          $zip = "${{ env.APP_NAME }}-${{ env.APP_VERSION }}-windows.zip"
+          Compress-Archive -Path "build\jpackage\${{ env.APP_NAME }}\*" -DestinationPath $zip -Force
+          echo "ASSET_ZIP=$zip" >> $env:GITHUB_ENV
+
+      - name: Upload asset to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ASSET_ZIP }}
