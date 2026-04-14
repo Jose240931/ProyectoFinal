@@ -57,4 +57,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     ksp(libs.androidx.room.compiler)
     debugImplementation(libs.androidx.ui.tooling)
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
 }

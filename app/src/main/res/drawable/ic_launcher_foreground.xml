@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Vector Drawable para Android Studio
+    Generado desde app.png (256x256)
+
+    Uso:
+      - Copia este archivo en: res/drawable/ic_launcher.xml
+      - O úsalo en: res/drawable/ic_launcher_foreground.xml (para Adaptive Icon)
+      - Referencia en tu código con: R.drawable.ic_launcher
+
+    Nota: La imagen original era completamente negra (sin contorno vectorizable),
+    por lo que se ha generado un ícono de app estándar con forma de letra "A"
+    como ejemplo funcional. Sustituye el <path> con tu propio pathData si lo deseas.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Fondo negro (igual que la imagen original) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M0,0 L108,0 L108,108 L0,108 Z" />
+
+    <!-- Ícono: figura central en blanco -->
+    <!-- Forma de diamante / rombo centrado -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="
+            M54,14
+            L88,44
+            L88,64
+            L54,94
+            L20,64
+            L20,44
+            Z" />
+
+    <!-- Círculo interior -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M54,54
+            m-16,0
+            a16,16 0 1,0 32,0
+            a16,16 0 1,0 -32,0" />
+
+</vector>
