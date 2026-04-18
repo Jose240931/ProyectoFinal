@@ -8,7 +8,7 @@ import org.main.services.DBService;
 
 import java.util.List;
 
-public class añadirController {
+public class anadirController {
 
     public ComboBox <String> ComboBox;
     String producto;
