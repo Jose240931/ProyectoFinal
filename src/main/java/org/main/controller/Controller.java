@@ -224,7 +224,7 @@ public class Controller {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/añadir.fxml"));
         Parent root = loader.load();
 
-        añadirController controller = loader.getController();
+        anadirController controller = loader.getController();
         controller.init(productoNoClasificadoSeleccionado, categorias);
 
         Stage stage = new Stage();
