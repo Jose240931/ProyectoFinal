@@ -25,6 +25,12 @@ public class Controller {
 
     public TextArea input;
     public ListView<String> listaOrdenada;
+    public Button botonAñadir;
+    private String productoNoClasificadoSeleccionado;
+
+    public void initialize(){
+        añadirACategoria();
+    }
 
     public List<String> obtenerListaOrdenada() {
         return new ArrayList<>(listaOrdenada.getItems());
@@ -161,5 +167,72 @@ public class Controller {
         alert.setHeaderText("Acerca de");
         alert.setContentText("Programa realizado por Jose Garrido Luna 2026 2ºDAM");
         alert.showAndWait();
+    }
+
+    //Metodo para añadir un prodcuto no registrado a una categoria existente de la base de datos
+    public void añadirACategoria() {
+        //Listener de la lista para detectar cambios cada vez que se clicka sobre una celda distinta
+        listaOrdenada.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+
+            int idx = newValue.intValue();
+            if (idx < 0) return;
+
+            String selected = listaOrdenada.getItems().get(idx);
+            if (selected == null) return;
+
+            // Si es una cabecera ignora
+            if ((selected.startsWith("====")&& selected.endsWith("===="))) return;
+
+            String cabecera = encontrarCabeceraAnterior(idx);
+            if (cabecera == null) return;
+
+            //Detecta si el click ha sido sobre un producto no clasificado
+            if (cabecera.toLowerCase().contains("no clasificado".toLowerCase()) || cabecera.toLowerCase().contains("no clasificado")) {
+                System.out.println("Click en producto NO CLASIFICADO: " + selected);
+                //Guarda el string del producto no clasificado
+                productoNoClasificadoSeleccionado = selected;
+                //Añado el boton de añadir a la interfaz
+                botonAñadir.setManaged(true);
+                botonAñadir.setVisible(true);
+            } else {
+                // Producto de otra categoría oculto el boton
+                botonAñadir.setVisible(false);
+                botonAñadir.setManaged(false);
+            }
+        });
+    }
+
+    private boolean esCabecera(String s) {
+        return s.startsWith("====") && s.endsWith("====");
+    }
+
+    private String encontrarCabeceraAnterior(int fromIndex) {
+        for (int i = fromIndex; i >= 0; i--) {
+            String item = listaOrdenada.getItems().get(i);
+            if (item != null && esCabecera(item)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    public void AñadirProducto(ActionEvent actionEvent) throws IOException {
+        DBService db = new DBService();
+        List<String> categorias = db.obtenerCategorias();
+        //Carga y abre el fxml de la ventana de añadir
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/añadir.fxml"));
+        Parent root = loader.load();
+
+        añadirController controller = loader.getController();
+        controller.init(productoNoClasificadoSeleccionado, categorias);
+
+        Stage stage = new Stage();
+        stage.setTitle("Añadir producto");
+        stage.setScene(new Scene(root));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.showAndWait();
+
+        ordenar(null);
     }
 }

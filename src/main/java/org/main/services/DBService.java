@@ -31,9 +31,10 @@ public class DBService {
             SELECT c.nombre_categoria, p.nombre_producto
             FROM producto p
             JOIN categoria c ON p.id_categoria = c.id_categoria
-            WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                  LOWER(p.nombre_producto),'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u')
-                  LIKE '%' || ? || '%'
+           WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                            LOWER(p.nombre_producto),
+                                            'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u'),'ü','u'),'ñ','n')
+                                            LIKE '%' || ? || '%'
         """;
 
         List<ProductoInfo> candidatos = new ArrayList<>();
@@ -64,6 +65,7 @@ public class DBService {
                              - calcularRelevancia(normalizar(b.getNombreReal()), query))
                 .orElse(null);
     }
+    //Toda la ordenacion la ha mejorado chatgpt sigue sin ser perfecta pero es mejor de lo que era
 
     /**
      * Calcula la relevancia de un nombre de producto respecto a la búsqueda.
@@ -145,5 +147,79 @@ public class DBService {
             }
         }
         return dp[la][lb];
+    }
+
+    //Con este metodo se almacena en la base de datos el nuevo producto creado en la categoria seleccionada
+    public void guardar(String nombreProducto, String nombreCategoria) {
+        System.out.println("DEBUG: DBService.guardar() -> producto=" + nombreProducto
+                + " categoria=" + nombreCategoria);
+        System.out.println("DEBUG: DB URL = " + URL);
+        String sqlCat = "SELECT id_categoria FROM categoria WHERE nombre_categoria = ?";
+        String sqlExiste = "SELECT 1 FROM producto WHERE LOWER(nombre_producto) = LOWER(?) AND id_categoria = ? LIMIT 1";
+        String sqlIns = "INSERT INTO producto(nombre_producto, descripcion, id_categoria) VALUES(?, NULL, ?)";
+
+        try (Connection con = getConexion()) {
+            con.setAutoCommit(false);
+
+            int idCategoria;
+
+            // obtener id_categoria
+            try (PreparedStatement ps = con.prepareStatement(sqlCat)) {
+                ps.setString(1, nombreCategoria);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        System.out.println("DEBUG: categoria NO encontrada en tabla categoria: [" + nombreCategoria + "]");
+                        con.rollback();
+                        return;
+                    }
+                    idCategoria = rs.getInt("id_categoria");
+                    System.out.println("DEBUG: categoria encontrada, idCategoria=" + idCategoria);
+                }
+            }
+
+            //evitar duplicados
+            try (PreparedStatement ps = con.prepareStatement(sqlExiste)) {
+                ps.setString(1, nombreProducto.trim());
+                ps.setInt(2, idCategoria);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        System.out.println("DEBUG: producto YA existe en esa categoria (no inserto)");
+                        con.rollback(); // o con.commit(); (no cambia nada realmente)
+                        return;
+                    }
+                    System.out.println("DEBUG: producto no existe, procedo a insertar");
+                }
+            }
+
+            // insertar
+            try (PreparedStatement ps = con.prepareStatement(sqlIns)) {
+                ps.setString(1, nombreProducto.trim());
+                ps.setInt(2, idCategoria);
+                int n=ps.executeUpdate();
+                System.out.println("DEBUG: insert filas=" + n);
+            }
+
+            con.commit();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    //Este metodo devuelve todas las categorias de la base de datos, el otro metodo de nombre parecido sin s solo devuelve el de un producto determinado
+    public List<String> obtenerCategorias() {
+        String sql = "SELECT nombre_categoria FROM categoria ORDER BY nombre_categoria";
+        List<String> res = new ArrayList<>();
+
+        try (Connection con = getConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                res.add(rs.getString("nombre_categoria"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
     }
 }
