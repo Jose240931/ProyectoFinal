@@ -221,7 +221,7 @@ public class Controller {
         DBService db = new DBService();
         List<String> categorias = db.obtenerCategorias();
         //Carga y abre el fxml de la ventana de añadir
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/añadir.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/anadir.fxml"));
         Parent root = loader.load();
 
         anadirController controller = loader.getController();

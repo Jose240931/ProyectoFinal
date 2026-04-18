@@ -8,7 +8,7 @@
       prefWidth="300"
       spacing="15" alignment="CENTER"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.main.controller.añadirController">
+      fx:controller="org.main.controller.anadirController">
     <padding>
         <Insets top="20" bottom="20" left="20" right="20"/>
     </padding>
