@@ -57,12 +57,22 @@ jobs:
             --main-class "${MAIN_CLASS}" \
             --dest build/jpackage
 
+      - name: Copy database into app-image root (Linux)
+        shell: bash
+        run: |
+            cp -v "info.db" "build/jpackage/${APP_NAME}/info.db"
+
       - name: Create portable tar.gz
         shell: bash
         run: |
           ASSET_TGZ="${APP_NAME}-${APP_VERSION}-linux-x64.tar.gz"
           tar -czf "${ASSET_TGZ}" -C build/jpackage "${APP_NAME}"
           echo "ASSET_TGZ=${ASSET_TGZ}" >> $GITHUB_ENV
+
+      - name: Copy database into app-image root (Linux)
+        shell: bash
+        run: |
+          cp -v "info.db" "build/jpackage/${APP_NAME}/info.db"
 
       - name: jpackage (Linux deb)
         shell: bash
@@ -75,6 +85,11 @@ jobs:
             --main-jar "${MAIN_JAR}" \
             --main-class "${MAIN_CLASS}" \
             --dest build/jpackage
+          
+      - name: Copy database into deb root (Linux)
+        shell: bash
+        run: |
+          cp -v "info.db" "build/jpackage/${APP_NAME}/info.db"
 
       - name: jpackage (Linux rpm)
         shell: bash
@@ -133,6 +148,11 @@ jobs:
             --main-jar "${{ env.MAIN_JAR }}" `
             --main-class "${{ env.MAIN_CLASS }}" `
             --dest build\jpackage
+
+      - name: Copy database into app-image root (Windows)
+        shell: pwsh
+        run: |
+          Copy-Item -Force "info.db" "build\jpackage\${{ env.APP_NAME }}\info.db"
 
       - name: Zip app-image
         shell: pwsh
