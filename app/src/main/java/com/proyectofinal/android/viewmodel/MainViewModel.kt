@@ -33,9 +33,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                categoriasDisponibles = productoRepository.obtenerCategorias()
-            )
+            try {
+                _uiState.value = _uiState.value.copy(
+                    categoriasDisponibles = productoRepository.obtenerCategorias(),
+                    errorMessage = null
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "No se han podido cargar las categorías"
+                )
+            }
         }
     }
 

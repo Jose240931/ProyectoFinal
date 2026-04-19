@@ -44,9 +44,7 @@ fun MainScreen(
         }
     }
     LaunchedEffect(uiState.listaOrdenada) {
-        selectedIndex?.let { index ->
-            if (index >= uiState.listaOrdenada.size) selectedIndex = null
-        }
+        selectedIndex = null
     }
     LaunchedEffect(uiState.categoriasDisponibles) {
         if (selectedCategoria.isBlank() && uiState.categoriasDisponibles.isNotEmpty()) {
