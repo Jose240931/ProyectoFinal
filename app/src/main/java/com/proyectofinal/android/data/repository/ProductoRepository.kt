@@ -35,6 +35,7 @@ class ProductoRepository(
         val yaExiste = productoDao.existeProductoEnCategoria(nombreNormalizado, idCategoria)
         if (yaExiste) return false
 
+        // Room returns -1L when OnConflictStrategy.IGNORE prevents insertion.
         return productoDao.insert(
             Producto(
                 nombreProducto = nombreNormalizado,

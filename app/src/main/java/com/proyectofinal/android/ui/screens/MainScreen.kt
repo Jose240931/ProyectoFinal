@@ -44,9 +44,7 @@ fun MainScreen(
         }
     }
     LaunchedEffect(uiState.listaOrdenada) {
-        if (selectedIndex != null && selectedIndex!! >= uiState.listaOrdenada.size) {
-            selectedIndex = null
-        }
+        selectedIndex?.let { if (it >= uiState.listaOrdenada.size) selectedIndex = null }
     }
     LaunchedEffect(uiState.categoriasDisponibles) {
         if (selectedCategoria.isBlank() && uiState.categoriasDisponibles.isNotEmpty()) {
@@ -188,7 +186,6 @@ fun MainScreen(
                 if (selectedNoClasificado) {
                     OutlinedButton(
                         onClick = {
-                            selectedCategoria = uiState.categoriasDisponibles.firstOrNull().orEmpty()
                             showAddDialog = true
                         },
                         modifier = Modifier.fillMaxWidth(),
