@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 data class MainUiState(
     val inputText: String = "",
     val listaOrdenada: List<String> = emptyList(),
+    val categoriasDisponibles: List<String> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val savedMessage: String? = null
@@ -24,11 +25,19 @@ data class MainUiState(
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val db = AppDatabase.getInstance(application)
-    private val productoRepository = ProductoRepository(db.productoDao())
+    private val productoRepository = ProductoRepository(db.productoDao(), db.categoriaDao())
     private val listaRepository = ListaRepository(db.listaDao())
 
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                categoriasDisponibles = productoRepository.obtenerCategorias()
+            )
+        }
+    }
 
     fun onInputChanged(text: String) {
         _uiState.value = _uiState.value.copy(inputText = text)
@@ -112,5 +121,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearSavedMessage() {
         _uiState.value = _uiState.value.copy(savedMessage = null)
+    }
+
+    fun anadirProductoNoClasificado(nombreProducto: String, nombreCategoria: String) {
+        viewModelScope.launch {
+            val guardado = productoRepository.guardarProductoEnCategoria(nombreProducto, nombreCategoria)
+            _uiState.value = _uiState.value.copy(
+                savedMessage = if (guardado) {
+                    "Producto \"$nombreProducto\" añadido a \"$nombreCategoria\""
+                } else {
+                    "No se ha podido añadir el producto"
+                }
+            )
+            if (guardado) ordenar()
+        }
     }
 }

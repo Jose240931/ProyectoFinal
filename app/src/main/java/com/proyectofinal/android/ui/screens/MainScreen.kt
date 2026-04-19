@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
@@ -29,13 +29,28 @@ fun MainScreen(
     var showAbout by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var saveListName by remember { mutableStateOf("") }
-    var selectedItem by remember { mutableStateOf<String?>(null) }
+    var selectedIndex by remember { mutableStateOf<Int?>(null) }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var selectedCategoria by remember { mutableStateOf("") }
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val selectedItem = selectedIndex?.let { uiState.listaOrdenada.getOrNull(it) }
+    val selectedNoClasificado = selectedIndex?.let { esProductoNoClasificado(it, uiState.listaOrdenada) } == true
+
     LaunchedEffect(uiState.savedMessage) {
         uiState.savedMessage?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearSavedMessage()
+        }
+    }
+    LaunchedEffect(uiState.listaOrdenada) {
+        if (selectedIndex != null && selectedIndex!! >= uiState.listaOrdenada.size) {
+            selectedIndex = null
+        }
+    }
+    LaunchedEffect(uiState.categoriasDisponibles) {
+        if (selectedCategoria.isBlank() && uiState.categoriasDisponibles.isNotEmpty()) {
+            selectedCategoria = uiState.categoriasDisponibles.first()
         }
     }
 
@@ -119,9 +134,9 @@ fun MainScreen(
                         .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    items(uiState.listaOrdenada) { item ->
+                    itemsIndexed(uiState.listaOrdenada) { index, item ->
                         val isHeader = item.startsWith("====") && item.endsWith("====")
-                        val isSelected = item == selectedItem
+                        val isSelected = selectedIndex == index
                         if (isHeader) {
                             Text(
                                 text = item,
@@ -139,7 +154,7 @@ fun MainScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        selectedItem = if (isSelected) null else item
+                                        selectedIndex = if (isSelected) null else index
                                     }
                                     .background(
                                         if (isSelected) MaterialTheme.colorScheme.secondaryContainer
@@ -158,7 +173,7 @@ fun MainScreen(
                     onClick = {
                         selectedItem?.let {
                             viewModel.eliminarItem(it)
-                            selectedItem = null
+                            selectedIndex = null
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -168,6 +183,19 @@ fun MainScreen(
                     )
                 ) {
                     Text("Borrar seleccionado")
+                }
+
+                if (selectedNoClasificado) {
+                    OutlinedButton(
+                        onClick = {
+                            selectedCategoria = uiState.categoriasDisponibles.firstOrNull().orEmpty()
+                            showAddDialog = true
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = uiState.categoriasDisponibles.isNotEmpty()
+                    ) {
+                        Text("Añadir producto a categoría")
+                    }
                 }
             }
         }
@@ -215,4 +243,74 @@ fun MainScreen(
             }
         )
     }
+
+    if (showAddDialog && selectedItem != null) {
+        var expanded by remember { mutableStateOf(false) }
+
+        AlertDialog(
+            onDismissRequest = { showAddDialog = false },
+            title = { Text("Añadir producto no clasificado") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Producto: $selectedItem")
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = { expanded = !expanded }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedCategoria,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Categoría") },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            uiState.categoriasDisponibles.forEach { categoria ->
+                                DropdownMenuItem(
+                                    text = { Text(categoria) },
+                                    onClick = {
+                                        selectedCategoria = categoria
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (selectedCategoria.isNotBlank()) {
+                            viewModel.anadirProductoNoClasificado(selectedItem, selectedCategoria)
+                            selectedIndex = null
+                            showAddDialog = false
+                        }
+                    },
+                    enabled = selectedCategoria.isNotBlank()
+                ) { Text("Guardar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAddDialog = false }) { Text("Cancelar") }
+            }
+        )
+    }
+}
+
+private fun esProductoNoClasificado(index: Int, lista: List<String>): Boolean {
+    if (index < 0 || index >= lista.size) return false
+    if (lista[index].startsWith("====") && lista[index].endsWith("====")) return false
+
+    for (i in index downTo 0) {
+        val item = lista[i]
+        if (item.startsWith("====") && item.endsWith("====")) {
+            return item.equals("==== No clasificado ====", ignoreCase = true)
+        }
+    }
+    return false
 }
