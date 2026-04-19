@@ -2,9 +2,14 @@ package com.proyectofinal.android.data.repository
 
 import com.proyectofinal.android.data.db.dao.ProductoDao
 import com.proyectofinal.android.data.db.dao.ProductoConCategoria
+import com.proyectofinal.android.data.db.dao.CategoriaDao
+import com.proyectofinal.android.data.db.entity.Producto
 import com.proyectofinal.android.util.normalizarTexto
 
-class ProductoRepository(private val productoDao: ProductoDao) {
+class ProductoRepository(
+    private val productoDao: ProductoDao,
+    private val categoriaDao: CategoriaDao
+) {
 
     /**
      * Finds the best matching category for a product name.
@@ -18,6 +23,24 @@ class ProductoRepository(private val productoDao: ProductoDao) {
         return candidatos.minByOrNull { candidato ->
             calcularRelevancia(normalizarTexto(candidato.nombre_producto), query)
         }
+    }
+
+    suspend fun obtenerCategorias(): List<String> = categoriaDao.getNombresCategorias()
+
+    suspend fun guardarProductoEnCategoria(nombreProducto: String, nombreCategoria: String): Boolean {
+        val nombreNormalizado = nombreProducto.trim()
+        if (nombreNormalizado.isBlank()) return false
+
+        val idCategoria = categoriaDao.getIdCategoriaPorNombre(nombreCategoria) ?: return false
+        val yaExiste = productoDao.existeProductoEnCategoria(nombreNormalizado, idCategoria)
+        if (yaExiste) return false
+
+        return productoDao.insert(
+            Producto(
+                nombreProducto = nombreNormalizado,
+                idCategoria = idCategoria
+            )
+        ) != -1L
     }
 
     private fun calcularRelevancia(nombreNormalizado: String, queryNormalizado: String): Int {

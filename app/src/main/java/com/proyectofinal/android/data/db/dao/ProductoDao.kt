@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.proyectofinal.android.data.db.entity.Producto
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProductoDao {
@@ -21,6 +20,19 @@ interface ProductoDao {
 
     @Query("SELECT COUNT(*) FROM producto")
     suspend fun count(): Int
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(producto: Producto): Long
+
+    @Query("""
+        SELECT EXISTS(
+            SELECT 1
+            FROM producto
+            WHERE LOWER(nombre_producto) = LOWER(:nombreProducto)
+              AND id_categoria = :idCategoria
+        )
+    """)
+    suspend fun existeProductoEnCategoria(nombreProducto: String, idCategoria: Int): Boolean
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(productos: List<Producto>)
