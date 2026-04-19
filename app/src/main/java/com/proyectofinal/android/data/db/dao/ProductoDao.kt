@@ -30,7 +30,6 @@ interface ProductoDao {
             FROM producto
             WHERE LOWER(nombre_producto) = LOWER(:nombreProducto)
               AND id_categoria = :idCategoria
-            LIMIT 1
         )
     """)
     suspend fun existeProductoEnCategoria(nombreProducto: String, idCategoria: Int): Boolean

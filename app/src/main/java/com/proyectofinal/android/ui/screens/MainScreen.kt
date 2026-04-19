@@ -284,7 +284,7 @@ fun MainScreen(
                 TextButton(
                     onClick = {
                         if (selectedCategoria.isNotBlank()) {
-                            viewModel.anadirProductoNoClasificado(selectedItem, selectedCategoria)
+                            viewModel.anadirProductoACategoria(selectedItem, selectedCategoria)
                             selectedIndex = null
                             showAddDialog = false
                         }

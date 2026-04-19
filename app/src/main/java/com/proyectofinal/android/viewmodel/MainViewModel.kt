@@ -130,7 +130,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.value = _uiState.value.copy(savedMessage = null)
     }
 
-    fun anadirProductoNoClasificado(nombreProducto: String, nombreCategoria: String) {
+    fun anadirProductoACategoria(nombreProducto: String, nombreCategoria: String) {
         viewModelScope.launch {
             val guardado = productoRepository.guardarProductoEnCategoria(nombreProducto, nombreCategoria)
             _uiState.value = _uiState.value.copy(
