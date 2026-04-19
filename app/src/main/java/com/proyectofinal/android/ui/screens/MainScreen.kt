@@ -30,11 +30,12 @@ fun MainScreen(
     var showSaveDialog by remember { mutableStateOf(false) }
     var saveListName by remember { mutableStateOf("") }
     var selectedIndex by remember { mutableStateOf<Int?>(null) }
+    var selectedLabel by remember { mutableStateOf<String?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
     var selectedCategoria by remember { mutableStateOf("") }
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val selectedItem = selectedIndex?.let { uiState.listaOrdenada.getOrNull(it) }
+    val selectedItem = selectedLabel
     val selectedNoClasificado = selectedIndex?.let { esProductoNoClasificado(it, uiState.listaOrdenada) } == true
 
     LaunchedEffect(uiState.savedMessage) {
@@ -44,7 +45,11 @@ fun MainScreen(
         }
     }
     LaunchedEffect(uiState.listaOrdenada) {
-        selectedIndex = null
+        selectedLabel?.let { label ->
+            val index = uiState.listaOrdenada.indexOf(label)
+            selectedIndex = if (index >= 0) index else null
+            if (index < 0) selectedLabel = null
+        }
     }
     LaunchedEffect(uiState.categoriasDisponibles) {
         if (selectedCategoria.isBlank() && uiState.categoriasDisponibles.isNotEmpty()) {
@@ -152,7 +157,13 @@ fun MainScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        selectedIndex = if (isSelected) null else index
+                                        if (isSelected) {
+                                            selectedIndex = null
+                                            selectedLabel = null
+                                        } else {
+                                            selectedIndex = index
+                                            selectedLabel = item
+                                        }
                                     }
                                     .background(
                                         if (isSelected) MaterialTheme.colorScheme.secondaryContainer
@@ -172,6 +183,7 @@ fun MainScreen(
                         selectedItem?.let {
                             viewModel.eliminarItem(it)
                             selectedIndex = null
+                            selectedLabel = null
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -286,6 +298,7 @@ fun MainScreen(
                         if (selectedCategoria.isNotBlank()) {
                             viewModel.anadirProductoACategoria(selectedItem, selectedCategoria)
                             selectedIndex = null
+                            selectedLabel = null
                             showAddDialog = false
                         }
                     },
