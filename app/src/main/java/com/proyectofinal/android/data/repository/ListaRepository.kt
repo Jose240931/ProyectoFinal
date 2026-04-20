@@ -15,6 +15,9 @@ class ListaRepository(private val listaDao: ListaDao) {
     fun getItemsByLista(idLista: Int): Flow<List<ListaItem>> =
         listaDao.getItemsByLista(idLista)
 
+    suspend fun getItemsByListaOnce(idLista: Int): List<ListaItem> =
+        listaDao.getItemsByListaOnce(idLista)
+
     suspend fun guardarLista(nombre: String, items: List<ListaItem>): Long {
         val ahora = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
         val lista = Lista(nombreLista = nombre, fechaCreacion = ahora)

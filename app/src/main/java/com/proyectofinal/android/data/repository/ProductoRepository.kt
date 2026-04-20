@@ -10,6 +10,9 @@ class ProductoRepository(
     private val productoDao: ProductoDao,
     private val categoriaDao: CategoriaDao
 ) {
+    private companion object {
+        const val MIN_AUTOCOMPLETE_LENGTH = 2
+    }
 
     /**
      * Finds the best matching category for a product name.
@@ -26,6 +29,12 @@ class ProductoRepository(
     }
 
     suspend fun obtenerCategorias(): List<String> = categoriaDao.getNombresCategorias()
+
+    suspend fun sugerirProductos(query: String, limit: Int = 6): List<String> {
+        val texto = normalizarTexto(query.trim())
+        if (texto.length < MIN_AUTOCOMPLETE_LENGTH) return emptyList()
+        return productoDao.sugerirProductos(texto, limit)
+    }
 
     suspend fun guardarProductoEnCategoria(nombreProducto: String, nombreCategoria: String): Boolean {
         val nombreNormalizado = nombreProducto.trim()

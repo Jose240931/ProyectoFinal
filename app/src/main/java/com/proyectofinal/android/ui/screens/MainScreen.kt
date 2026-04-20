@@ -13,6 +13,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,6 +27,7 @@ import com.proyectofinal.android.viewmodel.MainViewModel
 @Composable
 fun MainScreen(
     onVerListasGuardadas: () -> Unit,
+    listaIdToLoad: Int? = null,
     viewModel: MainViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -43,6 +48,9 @@ fun MainScreen(
             snackbarHostState.showSnackbar(it)
             viewModel.clearSavedMessage()
         }
+    }
+    LaunchedEffect(listaIdToLoad) {
+        listaIdToLoad?.let { viewModel.cargarListaGuardada(it) }
     }
     LaunchedEffect(uiState.listaOrdenada) {
         selectedLabel?.let { label ->
@@ -97,6 +105,27 @@ fun MainScreen(
                 placeholder = { Text("Introduzca su lista (un artículo por línea)") },
                 maxLines = 10
             )
+
+            if (uiState.autocompleteSuggestions.isNotEmpty()) {
+                ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                    Column {
+                        uiState.autocompleteSuggestions.forEach { sugerencia ->
+                            Text(
+                                text = sugerencia,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { viewModel.aplicarSugerencia(sugerencia) }
+                                    .semantics {
+                                        role = Role.Button
+                                        contentDescription = "Sugerencia: $sugerencia"
+                                    }
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

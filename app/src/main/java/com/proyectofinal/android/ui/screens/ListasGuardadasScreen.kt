@@ -22,6 +22,7 @@ import com.proyectofinal.android.viewmodel.ListaViewModel
 @Composable
 fun ListasGuardadasScreen(
     onBack: () -> Unit,
+    onCargarLista: (Int) -> Unit,
     viewModel: ListaViewModel = viewModel()
 ) {
     val listas by viewModel.todasLasListas.collectAsStateWithLifecycle()
@@ -80,6 +81,7 @@ fun ListasGuardadasScreen(
                                 viewModel.cargarDetalleLista(lista)
                             }
                         },
+                        onLoad = { onCargarLista(lista.idLista) },
                         onDelete = { viewModel.eliminarLista(lista) }
                     )
                 }
@@ -94,6 +96,7 @@ private fun ListaCard(
     isExpanded: Boolean,
     items: List<com.proyectofinal.android.data.db.entity.ListaItem>,
     onToggleExpand: () -> Unit,
+    onLoad: () -> Unit,
     onDelete: () -> Unit
 ) {
     Card(
@@ -118,6 +121,9 @@ private fun ListaCard(
                     )
                 }
                 Row {
+                    TextButton(onClick = onLoad) {
+                        Text("Cargar")
+                    }
                     IconButton(onClick = onToggleExpand) {
                         Icon(
                             if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,

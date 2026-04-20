@@ -34,6 +34,26 @@ interface ProductoDao {
     """)
     suspend fun existeProductoEnCategoria(nombreProducto: String, idCategoria: Int): Boolean
 
+    @Query("""
+        SELECT DISTINCT nombre_producto
+        FROM producto
+        WHERE LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+              nombre_producto,'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u'))
+              LIKE '%' || :query || '%'
+        ORDER BY
+            CASE
+                WHEN LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                     nombre_producto,'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u'))
+                     LIKE :query || '%'
+                THEN 0
+                ELSE 1
+            END,
+            LENGTH(nombre_producto),
+            nombre_producto
+        LIMIT :limit
+    """)
+    suspend fun sugerirProductos(query: String, limit: Int): List<String>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(productos: List<Producto>)
 }
