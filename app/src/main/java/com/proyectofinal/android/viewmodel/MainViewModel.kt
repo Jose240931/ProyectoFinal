@@ -202,11 +202,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         autocompleteJob?.cancel()
         autocompleteJob = viewModelScope.launch {
+            val snapshotInput = _uiState.value.inputText
             delay(AUTOCOMPLETE_DEBOUNCE_MS)
+            if (_uiState.value.inputText != snapshotInput) return@launch
             val sugerencias = productoRepository.sugerirProductos(fragmento)
-            if (fragmento == _uiState.value.inputText.substringAfterLast('\n').trim()) {
-                _uiState.value = _uiState.value.copy(autocompleteSuggestions = sugerencias)
-            }
+            _uiState.value = _uiState.value.copy(autocompleteSuggestions = sugerencias)
         }
     }
 

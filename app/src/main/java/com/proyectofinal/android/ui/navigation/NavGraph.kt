@@ -34,7 +34,9 @@ fun AppNavGraph(navController: NavHostController) {
                 }
             )
         ) { backStackEntry ->
-            val listaId = backStackEntry.arguments?.getInt("listaId")?.takeIf { it >= 1 }
+            val listaId = backStackEntry.arguments
+                ?.getInt("listaId")
+                ?.takeIf { it != Screen.Main.NO_LIST_ID }
             MainScreen(
                 onVerListasGuardadas = { navController.navigate(Screen.ListasGuardadas.route) },
                 listaIdToLoad = listaId
