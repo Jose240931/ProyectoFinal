@@ -18,6 +18,9 @@ interface ListaDao {
     @Query("SELECT * FROM lista_item WHERE id_lista = :idLista ORDER BY nombre_categoria, nombre_item")
     fun getItemsByLista(idLista: Int): Flow<List<ListaItem>>
 
+    @Query("SELECT * FROM lista_item WHERE id_lista = :idLista ORDER BY nombre_categoria, nombre_item")
+    suspend fun getItemsByListaOnce(idLista: Int): List<ListaItem>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLista(lista: Lista): Long
 

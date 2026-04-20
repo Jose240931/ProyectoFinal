@@ -27,6 +27,12 @@ class ProductoRepository(
 
     suspend fun obtenerCategorias(): List<String> = categoriaDao.getNombresCategorias()
 
+    suspend fun sugerirProductos(query: String, limit: Int = 6): List<String> {
+        val texto = normalizarTexto(query.trim())
+        if (texto.length < 2) return emptyList()
+        return productoDao.sugerirProductos(texto, limit)
+    }
+
     suspend fun guardarProductoEnCategoria(nombreProducto: String, nombreCategoria: String): Boolean {
         val nombreNormalizado = nombreProducto.trim()
         if (nombreNormalizado.isBlank()) return false

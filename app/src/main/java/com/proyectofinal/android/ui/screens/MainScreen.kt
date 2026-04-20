@@ -23,6 +23,7 @@ import com.proyectofinal.android.viewmodel.MainViewModel
 @Composable
 fun MainScreen(
     onVerListasGuardadas: () -> Unit,
+    listaIdToLoad: Int? = null,
     viewModel: MainViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -43,6 +44,9 @@ fun MainScreen(
             snackbarHostState.showSnackbar(it)
             viewModel.clearSavedMessage()
         }
+    }
+    LaunchedEffect(listaIdToLoad) {
+        listaIdToLoad?.let { viewModel.cargarListaGuardada(it) }
     }
     LaunchedEffect(uiState.listaOrdenada) {
         selectedLabel?.let { label ->
@@ -97,6 +101,23 @@ fun MainScreen(
                 placeholder = { Text("Introduzca su lista (un artículo por línea)") },
                 maxLines = 10
             )
+
+            if (uiState.autocompleteSuggestions.isNotEmpty()) {
+                ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                    Column {
+                        uiState.autocompleteSuggestions.forEach { sugerencia ->
+                            Text(
+                                text = sugerencia,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { viewModel.aplicarSugerencia(sugerencia) }
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

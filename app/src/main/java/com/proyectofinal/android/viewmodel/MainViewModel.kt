@@ -11,12 +11,14 @@ import com.proyectofinal.android.util.normalizarTexto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 data class MainUiState(
     val inputText: String = "",
     val listaOrdenada: List<String> = emptyList(),
     val categoriasDisponibles: List<String> = emptyList(),
+    val autocompleteSuggestions: List<String> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val savedMessage: String? = null
@@ -30,6 +32,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
+    private var autocompleteJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -48,6 +51,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onInputChanged(text: String) {
         _uiState.value = _uiState.value.copy(inputText = text)
+        actualizarSugerencias(text)
     }
 
     fun ordenar() {
@@ -84,13 +88,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             _uiState.value = _uiState.value.copy(
                 listaOrdenada = resultado,
-                isLoading = false
+                isLoading = false,
+                autocompleteSuggestions = emptyList()
             )
         }
     }
 
     fun borrar() {
-        _uiState.value = _uiState.value.copy(inputText = "", listaOrdenada = emptyList())
+        autocompleteJob?.cancel()
+        _uiState.value = _uiState.value.copy(
+            inputText = "",
+            listaOrdenada = emptyList(),
+            autocompleteSuggestions = emptyList()
+        )
     }
 
     fun eliminarItem(item: String) {
@@ -130,6 +140,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.value = _uiState.value.copy(savedMessage = null)
     }
 
+    fun aplicarSugerencia(sugerencia: String) {
+        val textoActual = _uiState.value.inputText
+        val lineas = textoActual.lines().toMutableList()
+
+        if (lineas.isEmpty()) {
+            lineas.add(sugerencia)
+        } else {
+            lineas[lineas.lastIndex] = sugerencia
+        }
+
+        _uiState.value = _uiState.value.copy(
+            inputText = lineas.joinToString("\n"),
+            autocompleteSuggestions = emptyList()
+        )
+    }
+
+    fun cargarListaGuardada(idLista: Int) {
+        if (idLista <= 0) return
+        viewModelScope.launch {
+            val items = listaRepository.getItemsByListaOnce(idLista)
+            val listaOrdenada = construirListaOrdenada(items)
+            _uiState.value = _uiState.value.copy(
+                inputText = items.joinToString("\n") { it.nombreItem },
+                listaOrdenada = listaOrdenada,
+                autocompleteSuggestions = emptyList(),
+                savedMessage = "Lista cargada"
+            )
+        }
+    }
+
     fun anadirProductoACategoria(nombreProducto: String, nombreCategoria: String) {
         viewModelScope.launch {
             val guardado = productoRepository.guardarProductoEnCategoria(nombreProducto, nombreCategoria)
@@ -142,5 +182,38 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             )
             if (guardado) ordenar()
         }
+    }
+
+    private fun actualizarSugerencias(texto: String) {
+        val fragmento = texto
+            .substringAfterLast('\n')
+            .trim()
+
+        if (fragmento.isBlank()) {
+            autocompleteJob?.cancel()
+            _uiState.value = _uiState.value.copy(autocompleteSuggestions = emptyList())
+            return
+        }
+
+        autocompleteJob?.cancel()
+        autocompleteJob = viewModelScope.launch {
+            val sugerencias = productoRepository.sugerirProductos(fragmento)
+            _uiState.value = _uiState.value.copy(autocompleteSuggestions = sugerencias)
+        }
+    }
+
+    private fun construirListaOrdenada(items: List<ListaItem>): List<String> {
+        if (items.isEmpty()) return emptyList()
+
+        val resultado = mutableListOf<String>()
+        var categoriaActual = ""
+        items.forEach { item ->
+            if (item.nombreCategoria != categoriaActual) {
+                categoriaActual = item.nombreCategoria
+                resultado.add("==== $categoriaActual ====")
+            }
+            resultado.add(item.nombreItem)
+        }
+        return resultado
     }
 }
