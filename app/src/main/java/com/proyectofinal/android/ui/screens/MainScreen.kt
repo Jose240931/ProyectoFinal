@@ -13,6 +13,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -111,6 +115,10 @@ fun MainScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable { viewModel.aplicarSugerencia(sugerencia) }
+                                    .semantics {
+                                        role = Role.Button
+                                        contentDescription = "Sugerencia: $sugerencia"
+                                    }
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
                                 style = MaterialTheme.typography.bodyMedium
                             )

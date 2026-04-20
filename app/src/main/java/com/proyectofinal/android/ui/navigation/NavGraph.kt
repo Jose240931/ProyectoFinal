@@ -12,6 +12,7 @@ import com.proyectofinal.android.ui.screens.ListasGuardadasScreen
 sealed class Screen(val route: String) {
     object Main : Screen("main?listaId={listaId}") {
         const val baseRoute = "main"
+        const val NO_LIST_ID = -1
         fun createRoute(listaId: Int? = null): String =
             listaId?.let { "main?listaId=$it" } ?: baseRoute
     }
@@ -29,7 +30,7 @@ fun AppNavGraph(navController: NavHostController) {
             arguments = listOf(
                 navArgument("listaId") {
                     type = NavType.IntType
-                    defaultValue = -1
+                    defaultValue = Screen.Main.NO_LIST_ID
                 }
             )
         ) { backStackEntry ->
@@ -44,7 +45,7 @@ fun AppNavGraph(navController: NavHostController) {
                 onBack = { navController.popBackStack() },
                 onCargarLista = { listaId ->
                     navController.navigate(Screen.Main.createRoute(listaId)) {
-                        popUpTo(Screen.Main.baseRoute) { inclusive = true }
+                        popUpTo(Screen.Main.baseRoute) { inclusive = false }
                         launchSingleTop = true
                     }
                 }

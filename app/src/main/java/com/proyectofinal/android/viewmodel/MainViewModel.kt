@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class MainUiState(
@@ -25,6 +26,10 @@ data class MainUiState(
 )
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
+    private companion object {
+        const val MIN_VALID_LIST_ID = 1
+        const val AUTOCOMPLETE_DEBOUNCE_MS = 300L
+    }
 
     private val db = AppDatabase.getInstance(application)
     private val productoRepository = ProductoRepository(db.productoDao(), db.categoriaDao())
@@ -157,7 +162,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun cargarListaGuardada(idLista: Int) {
-        if (idLista <= 0) return
+        if (idLista < MIN_VALID_LIST_ID) return
         viewModelScope.launch {
             val items = listaRepository.getItemsByListaOnce(idLista)
             val listaOrdenada = construirListaOrdenada(items)
@@ -197,8 +202,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         autocompleteJob?.cancel()
         autocompleteJob = viewModelScope.launch {
+            delay(AUTOCOMPLETE_DEBOUNCE_MS)
             val sugerencias = productoRepository.sugerirProductos(fragmento)
-            _uiState.value = _uiState.value.copy(autocompleteSuggestions = sugerencias)
+            if (fragmento == _uiState.value.inputText.substringAfterLast('\n').trim()) {
+                _uiState.value = _uiState.value.copy(autocompleteSuggestions = sugerencias)
+            }
         }
     }
 
@@ -208,8 +216,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val resultado = mutableListOf<String>()
         var categoriaActual = ""
         items.forEach { item ->
-            if (item.nombreCategoria != categoriaActual) {
-                categoriaActual = item.nombreCategoria
+            val categoria = item.nombreCategoria.ifBlank { "Sin categoría" }
+            if (categoria != categoriaActual) {
+                categoriaActual = categoria
                 resultado.add("==== $categoriaActual ====")
             }
             resultado.add(item.nombreItem)
